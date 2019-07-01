@@ -3,8 +3,10 @@ package by.vladislaw.kravchenok.criminalintent;
 import android.content.Context;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * Created by Vladislaw Kravchenok on 25.06.2019.
@@ -45,5 +47,14 @@ public class CrimeLab {
         }
 
         return null;
+    }
+
+    public int getCrimeIndex(UUID id) {
+        for (int i = 0; i < mCrimes.size(); i++) {
+            if(mCrimes.get(i).getId().equals(id)){
+                return i;
+            }
+        }
+        return 0;
     }
 }

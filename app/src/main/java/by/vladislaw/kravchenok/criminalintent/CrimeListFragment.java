@@ -1,17 +1,13 @@
 package by.vladislaw.kravchenok.criminalintent;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +31,9 @@ public class CrimeListFragment extends Fragment {
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
 
+    private static final int REQUEST_CRIME = 1;
+    private int mItemResultPosition;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -54,7 +53,6 @@ public class CrimeListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
         mCrimeRecyclerView = (RecyclerView) view.findViewById(R.id.crime_recycler_view);
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        updateUi();
         return view;
     }
 
@@ -74,6 +72,7 @@ public class CrimeListFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
+        updateUi();
     }
 
     @Override
@@ -115,8 +114,13 @@ public class CrimeListFragment extends Fragment {
     private void updateUi() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
-        mAdapter = new CrimeAdapter(crimes);
-        mCrimeRecyclerView.setAdapter(mAdapter);
+        if (mAdapter == null) {
+            mAdapter = new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        } else {
+            mAdapter.notifyItemChanged(mItemResultPosition);
+        }
+
 
     }
 
@@ -142,7 +146,17 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            Toast.makeText(getActivity(), mCrime.getTitle() + " clicked!", Toast.LENGTH_SHORT).show();
+            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
+            startActivityForResult(intent, REQUEST_CRIME);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult");
+        if(requestCode == REQUEST_CRIME){
+            mItemResultPosition = CrimeFragment.getCrimeItemPosition(data);
         }
     }
 
@@ -152,13 +166,17 @@ public class CrimeListFragment extends Fragment {
         public SeriousCrimeHolder(@NonNull View itemView) {
             super(itemView);
             mCallPoliceButton = itemView.findViewById(R.id.call_police_button);
-            mCallPoliceButton.setOnClickListener(this);
+            mCallPoliceButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(getActivity(), "Police is coming", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 
         @Override
         public void onClick(View view) {
             super.onClick(view);
-            Toast.makeText(getActivity(), "Police is coming", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -181,7 +199,7 @@ public class CrimeListFragment extends Fragment {
             switch (viewType) {
                 case ORDINARY_CRIME: {
                     View view = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_crime, parent, false);
-                    return new CrimeHolder(view) ;
+                    return new CrimeHolder(view);
                 }
                 case SERIOUS_CRIME: {
                     View view = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_serious_crime, parent, false);
