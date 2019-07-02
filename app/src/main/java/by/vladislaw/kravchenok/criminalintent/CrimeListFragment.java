@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import by.vladislaw.kravchenok.criminalintent.tools.DateFormatter;
+
 import static by.vladislaw.kravchenok.criminalintent.Constant.ORDINARY_CRIME;
 import static by.vladislaw.kravchenok.criminalintent.Constant.SERIOUS_CRIME;
 
@@ -141,7 +143,7 @@ public class CrimeListFragment extends Fragment {
         protected void bind(Crime crime) {
             mCrime = crime;
             mTitleTextView.setText(mCrime.getTitle());
-            mDateTextView.setText(mCrime.getDate().toString());
+            mDateTextView.setText(DateFormatter.format(mCrime.getDate()));
         }
 
         @Override
